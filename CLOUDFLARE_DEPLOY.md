@@ -1,4 +1,4 @@
-# Cloudflare Pages Deployment
+# Cloudflare Pages Deployment - kidchart.com
 
 ## Framework Details
 - **Frontend**: React 19
@@ -6,13 +6,14 @@
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts
+- **Domain**: kidchart.com
 
 ## Deploy to Cloudflare Pages
 
 ### Step 1: Push to GitHub
 ```bash
 git add .
-git commit -m "Fix Cloudflare Pages deployment - remove package-lock"
+git commit -m "Deploy to kidchart.com"
 git push origin main
 ```
 
@@ -36,21 +37,32 @@ git push origin main
 
 7. Click "Save and Deploy"
 
+### Step 3: Wait for Deployment
+- First deployment takes ~2-3 minutes
+- Initially live at: `kidchart.pages.dev`
+
+### Step 4: Connect Your Custom Domain (kidchart.com)
+
+Since you bought the domain through Cloudflare, this is super easy:
+
+1. Go to your Cloudflare Pages project
+2. Click "Custom domains" tab
+3. Click "Set up a custom domain"
+4. Enter: `kidchart.com`
+5. Click "Continue"
+6. **Also add `www.kidchart.com`** and set it to redirect to `kidchart.com`
+7. Cloudflare will automatically configure DNS (no manual DNS setup needed!)
+8. SSL certificate will be automatically provisioned (takes ~1 minute)
+
+Your site will be live at:
+- ✅ https://kidchart.com
+- ✅ https://www.kidchart.com (redirects to main)
+
 ### What Changed
 
 ✅ **Removed package-lock.json** - Prevents Cloudflare from using `npm ci` which was causing errors
 ✅ **Added .npmrc** - Disables automatic lockfile generation
 ✅ **Simple build command** - Just `npm install && npm run build`
-
-### Step 3: Wait for Deployment
-- First deployment takes ~2-3 minutes
-- You'll get a URL like: `kidchart.pages.dev`
-
-### Step 4: Add Custom Domain (Optional)
-1. Go to your project → "Custom domains"
-2. Click "Set up a custom domain"
-3. Enter your domain (e.g., `kidchart.com`)
-4. Follow DNS setup instructions
 
 ## Troubleshooting
 
@@ -60,14 +72,20 @@ Try this build command:
 npm install --legacy-peer-deps && npm run build
 ```
 
-## Benefits of Cloudflare Pages
+### Custom Domain Not Working
+- Wait 1-2 minutes for DNS propagation
+- Check SSL certificate status in Cloudflare Pages → Custom domains
+- Make sure DNS records were created automatically
 
-✅ **Free SSL** - Automatic HTTPS
+## Benefits of Cloudflare Pages + Custom Domain
+
+✅ **Free SSL** - Automatic HTTPS for kidchart.com
 ✅ **Global CDN** - Lightning fast worldwide
-✅ **Built-in Analytics** - No setup needed!
+✅ **Built-in Analytics** - Track visitors at kidchart.com
 ✅ **Unlimited bandwidth**
 ✅ **Preview deployments** - Test PRs before merging
 ✅ **Automatic deployments** - Every push to main auto-deploys
+✅ **Domain included** - No separate DNS management needed
 
 ## Local Testing
 
@@ -88,18 +106,26 @@ Visit http://localhost:4173 to preview the production build.
 ✅ Node version files added (.nvmrc, .node-version)
 ✅ Removed package-lock.json to fix npm ci error
 ✅ Added .npmrc configuration
-⏳ Pending: Push to GitHub and deploy on Cloudflare
+✅ Domain ready: kidchart.com
+⏳ Pending: Connect custom domain after deployment
 
 ## Next Steps
 
-1. Commit your changes:
+1. **Commit and push:**
    ```bash
    git add .
-   git commit -m "Fix Cloudflare deployment"
+   git commit -m "Deploy to kidchart.com"
    git push origin main
    ```
 
-2. Go to Cloudflare and retry deployment
-3. Your app will be live at `kidchart.pages.dev`!
+2. **Wait for deployment to succeed** (~2-3 minutes)
+
+3. **Add custom domain in Cloudflare Pages:**
+   - Go to project → Custom domains
+   - Add `kidchart.com`
+   - Add `www.kidchart.com`
+
+4. **Your app will be live at https://kidchart.com!**
+
 
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Child } from '../types';
-import { parseDateDDMMYYYY } from '../utils/dateFormat';
 
 interface AddChildFormProps {
   onAddChild: (child: Omit<Child, 'id' | 'measurements'>) => void;
@@ -11,30 +10,18 @@ export const AddChildForm = ({ onAddChild, onCancel }: AddChildFormProps) => {
   const [name, setName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [error, setError] = useState('');
-
-  const handleDateChange = (value: string) => {
-    // Allow only numbers and slashes
-    const cleaned = value.replace(/[^\d/]/g, '');
-    setDateOfBirth(cleaned);
-    setError('');
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name && dateOfBirth) {
-      const isoDate = parseDateDDMMYYYY(dateOfBirth);
-      if (!isoDate) {
-        setError('Please enter a valid date in DD/MM/YYYY format');
-        return;
-      }
-      onAddChild({ name, dateOfBirth: isoDate, gender });
+      onAddChild({ name, dateOfBirth, gender });
       setName('');
       setDateOfBirth('');
       setGender('male');
-      setError('');
     }
   };
+
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <form onSubmit={handleSubmit} className="card mb-6">
@@ -55,19 +42,26 @@ export const AddChildForm = ({ onAddChild, onCancel }: AddChildFormProps) => {
         </div>
         <div>
           <label htmlFor="dob" className="block text-sm font-medium mb-1">
-            Date of Birth (DD/MM/YYYY)
+            Date of Birth
           </label>
-          <input
-            type="text"
-            id="dob"
-            value={dateOfBirth}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="input-field"
-            placeholder="DD/MM/YYYY"
-            maxLength={10}
-            required
-          />
-          {error && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{error}</p>}
+          <div className="relative cursor-pointer" onClick={() => {
+            const input = document.getElementById('dob') as HTMLInputElement;
+            if (input?.showPicker) {
+              input.showPicker();
+            } else {
+              input?.focus();
+            }
+          }}>
+            <input
+              type="date"
+              id="dob"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              max={today}
+              className="input-field cursor-pointer"
+              required
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Gender</label>

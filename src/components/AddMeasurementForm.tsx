@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Measurement } from '../types';
 import { calculateAgeInDays } from '../utils/calculations';
-import { getTodayDDMMYYYY, parseDateDDMMYYYY } from '../utils/dateFormat';
 
 interface AddMeasurementFormProps {
   childDateOfBirth: string;
@@ -14,29 +13,18 @@ export const AddMeasurementForm = ({
   onAddMeasurement,
   onCancel,
 }: AddMeasurementFormProps) => {
-  const [date, setDate] = useState(getTodayDDMMYYYY());
+  // Use ISO format (YYYY-MM-DD) for the date input
+  const today = new Date().toISOString().split('T')[0];
+  const [date, setDate] = useState(today);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [headCircumference, setHeadCircumference] = useState('');
-  const [error, setError] = useState('');
-
-  const handleDateChange = (value: string) => {
-    // Allow only numbers and slashes
-    const cleaned = value.replace(/[^\d/]/g, '');
-    setDate(cleaned);
-    setError('');
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (date && (height || weight || headCircumference)) {
-      const isoDate = parseDateDDMMYYYY(date);
-      if (!isoDate) {
-        setError('Please enter a valid date in DD/MM/YYYY format');
-        return;
-      }
       onAddMeasurement({
-        date: isoDate,
+        date: date, // Already in ISO format
         height: height ? parseFloat(height) : undefined,
         weight: weight ? parseFloat(weight) : undefined,
         headCircumference: headCircumference ? parseFloat(headCircumference) : undefined,
@@ -44,12 +32,10 @@ export const AddMeasurementForm = ({
       setHeight('');
       setWeight('');
       setHeadCircumference('');
-      setError('');
     }
   };
 
-  const isoDate = parseDateDDMMYYYY(date);
-  const ageInDays = isoDate ? calculateAgeInDays(childDateOfBirth, isoDate) : 0;
+  const ageInDays = calculateAgeInDays(childDateOfBirth, date);
   const years = Math.floor(ageInDays / 365);
   const months = Math.floor((ageInDays % 365) / 30);
 
@@ -59,25 +45,30 @@ export const AddMeasurementForm = ({
       <div className="space-y-4">
         <div>
           <label htmlFor="date" className="block text-sm font-medium mb-1">
-            Date (DD/MM/YYYY)
+            Date
           </label>
-          <input
-            type="text"
-            id="date"
-            value={date}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="input-field"
-            placeholder="DD/MM/YYYY"
-            maxLength={10}
-            required
-          />
-          {error && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{error}</p>}
-          {!error && isoDate && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Age at measurement: {years > 0 && `${years}y `}
-              {months}m
-            </p>
-          )}
+          <div className="relative cursor-pointer" onClick={() => {
+            const input = document.getElementById('date') as HTMLInputElement;
+            if (input?.showPicker) {
+              input.showPicker();
+            } else {
+              input?.focus();
+            }
+          }}>
+            <input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              max={today}
+              className="input-field cursor-pointer"
+              required
+            />
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Age at measurement: {years > 0 && `${years}y `}
+            {months}m
+          </p>
         </div>
         <div>
           <label htmlFor="height" className="block text-sm font-medium mb-1">
