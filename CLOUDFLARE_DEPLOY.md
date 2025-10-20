@@ -12,7 +12,7 @@
 ### Step 1: Push to GitHub
 ```bash
 git add .
-git commit -m "Configure for Cloudflare Pages deployment"
+git commit -m "Fix Cloudflare Pages deployment"
 git push origin main
 ```
 
@@ -25,13 +25,24 @@ git push origin main
 5. Configure build settings:
    - **Project name**: `kidchart`
    - **Production branch**: `main`
-   - **Framework preset**: `Vite`
-   - **Build command**: `npm run build`
+   - **Framework preset**: `None` (we'll configure manually)
+   - **Build command**: `npm install --legacy-peer-deps && npm run build`
    - **Build output directory**: `dist`
    - **Root directory**: `/`
-   - **Node version**: `20`
 
-6. Click "Save and Deploy"
+6. Click "Environment variables (advanced)" and add:
+   - **Name**: `NODE_VERSION`
+   - **Value**: `20`
+
+7. Click "Save and Deploy"
+
+### Alternative Build Command
+
+If the above doesn't work, try:
+```bash
+./build.sh
+```
+(Make sure build.sh is in your repo and executable)
 
 ### Step 3: Wait for Deployment
 - First deployment takes ~2-3 minutes
@@ -42,6 +53,16 @@ git push origin main
 2. Click "Set up a custom domain"
 3. Enter your domain (e.g., `kidchart.com`)
 4. Follow DNS setup instructions
+
+## Troubleshooting
+
+### Build Fails with npm Error
+- Try: `npm install --legacy-peer-deps && npm run build`
+- Or use the build.sh script
+
+### Node Version Issues
+- Ensure NODE_VERSION=20 is set in environment variables
+- Check that .nvmrc and .node-version files are in the repo
 
 ## Benefits of Cloudflare Pages
 
@@ -67,6 +88,8 @@ Visit http://localhost:4173 to preview the production build.
 ✅ Vite configured for Cloudflare Pages
 ✅ Base path set to root `/`
 ✅ Build output configured
+✅ Node version files added (.nvmrc, .node-version)
+✅ Custom build script created
 ⏳ Pending: Push to GitHub and deploy on Cloudflare
 
 ## Next Steps
@@ -75,3 +98,4 @@ Visit http://localhost:4173 to preview the production build.
 2. Push to GitHub
 3. Follow Step 2 above to deploy on Cloudflare
 4. Your app will be live at `kidchart.pages.dev`!
+
