@@ -12,7 +12,7 @@
 ### Step 1: Push to GitHub
 ```bash
 git add .
-git commit -m "Fix Cloudflare Pages deployment"
+git commit -m "Fix Cloudflare Pages deployment - remove package-lock"
 git push origin main
 ```
 
@@ -25,8 +25,8 @@ git push origin main
 5. Configure build settings:
    - **Project name**: `kidchart`
    - **Production branch**: `main`
-   - **Framework preset**: `None` (we'll configure manually)
-   - **Build command**: `npm install --legacy-peer-deps && npm run build`
+   - **Framework preset**: `Vite` (or `None`)
+   - **Build command**: `npm install && npm run build`
    - **Build output directory**: `dist`
    - **Root directory**: `/`
 
@@ -36,13 +36,11 @@ git push origin main
 
 7. Click "Save and Deploy"
 
-### Alternative Build Command
+### What Changed
 
-If the above doesn't work, try:
-```bash
-./build.sh
-```
-(Make sure build.sh is in your repo and executable)
+✅ **Removed package-lock.json** - Prevents Cloudflare from using `npm ci` which was causing errors
+✅ **Added .npmrc** - Disables automatic lockfile generation
+✅ **Simple build command** - Just `npm install && npm run build`
 
 ### Step 3: Wait for Deployment
 - First deployment takes ~2-3 minutes
@@ -56,13 +54,11 @@ If the above doesn't work, try:
 
 ## Troubleshooting
 
-### Build Fails with npm Error
-- Try: `npm install --legacy-peer-deps && npm run build`
-- Or use the build.sh script
-
-### Node Version Issues
-- Ensure NODE_VERSION=20 is set in environment variables
-- Check that .nvmrc and .node-version files are in the repo
+### If Build Still Fails
+Try this build command:
+```bash
+npm install --legacy-peer-deps && npm run build
+```
 
 ## Benefits of Cloudflare Pages
 
@@ -77,6 +73,7 @@ If the above doesn't work, try:
 
 Before deploying, test locally:
 ```bash
+npm install
 npm run build
 npm run preview
 ```
@@ -89,13 +86,20 @@ Visit http://localhost:4173 to preview the production build.
 ✅ Base path set to root `/`
 ✅ Build output configured
 ✅ Node version files added (.nvmrc, .node-version)
-✅ Custom build script created
+✅ Removed package-lock.json to fix npm ci error
+✅ Added .npmrc configuration
 ⏳ Pending: Push to GitHub and deploy on Cloudflare
 
 ## Next Steps
 
-1. Commit your changes
-2. Push to GitHub
-3. Follow Step 2 above to deploy on Cloudflare
-4. Your app will be live at `kidchart.pages.dev`!
+1. Commit your changes:
+   ```bash
+   git add .
+   git commit -m "Fix Cloudflare deployment"
+   git push origin main
+   ```
+
+2. Go to Cloudflare and retry deployment
+3. Your app will be live at `kidchart.pages.dev`!
+
 
