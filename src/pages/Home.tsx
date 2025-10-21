@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Child, Measurement, PercentileStandard, MeasurementType, STANDARD_LABELS } from '../types';
 import { AddChildForm } from '../components/AddChildForm';
 import { AddMeasurementForm } from '../components/AddMeasurementForm';
 import { GrowthChart } from '../components/GrowthChart';
 import { MeasurementList } from '../components/MeasurementList';
+import { saveData, loadData, generateReadableId } from '../api/dataService';
 
 interface HomeProps {
   children: Child[];
@@ -21,6 +22,7 @@ interface HomeProps {
   onAddMeasurement: (measurementData: Omit<Measurement, 'id' | 'ageInDays'>) => void;
   onDeleteMeasurement: (measurementId: string) => void;
   onDeleteChild: (childId: string) => void;
+  onUpdateChildren: (children: Child[]) => void;
 }
 
 const Home: React.FC<HomeProps> = ({
@@ -39,8 +41,64 @@ const Home: React.FC<HomeProps> = ({
   onAddMeasurement,
   onDeleteMeasurement,
   onDeleteChild,
+  onUpdateChildren,
 }) => {
   const selectedChild = children.find((c) => c.id === selectedChildId);
+
+  // Save/Load state
+  const [dataId, setDataId] = useState('');
+  const [loadId, setLoadId] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+  const [loadStatus, setLoadStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+
+  const handleSaveData = async () => {
+    if (children.length === 0) {
+      setSaveStatus({ type: 'error', message: 'No data to save' });
+      setTimeout(() => setSaveStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const id = dataId || generateReadableId();
+      await saveData(id, children);
+      setDataId(id);
+
+      // Create shareable URL
+      const shareUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
+      setSaveStatus({ type: 'success', message: `Saved! Share this URL: ${shareUrl}` });
+      setTimeout(() => setSaveStatus({ type: null, message: '' }), 10000);
+    } catch (error) {
+      setSaveStatus({ type: 'error', message: 'Failed to save data' });
+      setTimeout(() => setSaveStatus({ type: null, message: '' }), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLoadData = async () => {
+    if (!loadId.trim()) {
+      setLoadStatus({ type: 'error', message: 'Please enter an ID' });
+      setTimeout(() => setLoadStatus({ type: null, message: '' }), 3000);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const data = await loadData(loadId.trim());
+      onUpdateChildren(data.children || []);
+      setDataId(loadId.trim());
+      setLoadStatus({ type: 'success', message: 'Data loaded successfully!' });
+      setTimeout(() => setLoadStatus({ type: null, message: '' }), 3000);
+    } catch (error) {
+      setLoadStatus({ type: 'error', message: 'Failed to load data. Check the ID and try again.' });
+      setTimeout(() => setLoadStatus({ type: null, message: '' }), 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4">
@@ -119,6 +177,58 @@ const Home: React.FC<HomeProps> = ({
               </button>
             </div>
           )}
+
+          {/* Save/Load Data Section - Always visible */}
+          <div className="card">
+            <h3 className="text-lg font-semibold mb-4">Save/Load Data</h3>
+
+            {/* Save Section */}
+            <div className="mb-4">
+              <button
+                onClick={handleSaveData}
+                disabled={isSaving || children.length === 0}
+                className="btn-primary w-full bg-[#98971a] hover:bg-[#79740e] dark:bg-[#98971a] dark:hover:bg-[#79740e] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? 'Saving...' : 'Save Data'}
+              </button>
+              {dataId && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                  Current ID: <span className="font-mono font-semibold">{dataId}</span>
+                </p>
+              )}
+              {saveStatus.type && (
+                <div className={`mt-2 p-2 rounded text-sm ${saveStatus.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+                  {saveStatus.message}
+                </div>
+              )}
+            </div>
+
+            {/* Load Section */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Load Data by ID</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={loadId}
+                  onChange={(e) => setLoadId(e.target.value)}
+                  placeholder="Enter ID (e.g., happy-puppy-1234)"
+                  className="input-field flex-1"
+                />
+                <button
+                  onClick={handleLoadData}
+                  disabled={isLoading || !loadId.trim()}
+                  className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {isLoading ? 'Loading...' : 'Load'}
+                </button>
+              </div>
+              {loadStatus.type && (
+                <div className={`mt-2 p-2 rounded text-sm ${loadStatus.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+                  {loadStatus.message}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Child Details and Measurements */}
           {selectedChild && (

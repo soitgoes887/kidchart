@@ -3,6 +3,7 @@ import { Child, Measurement, PercentileStandard, MeasurementType } from './types
 import { KidChartIcon } from './components/KidChartLogo';
 import { saveChildren, loadChildren, saveLocation, loadLocation } from './utils/storage';
 import { calculateAgeInDays } from './utils/calculations';
+import { loadData } from './api/dataService';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -18,12 +19,43 @@ function App() {
 
   // Load data on mount
   useEffect(() => {
-    const loadedChildren = loadChildren();
-    setChildren(loadedChildren);
-    if (loadedChildren.length > 0) {
-      setSelectedChildId(loadedChildren[0].id);
-    }
-    setStandard(loadLocation() as PercentileStandard);
+    const loadInitialData = async () => {
+      // Check if there's an 'id' parameter in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedId = urlParams.get('id');
+
+      if (sharedId) {
+        // If there's a shared ID, load data from the API
+        try {
+          const data = await loadData(sharedId);
+          if (data.children && data.children.length > 0) {
+            setChildren(data.children);
+            setSelectedChildId(data.children[0].id);
+            // Clear the URL parameter after loading
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        } catch (error) {
+          console.error('Failed to load shared data:', error);
+          // Fall back to local storage if loading fails
+          const loadedChildren = loadChildren();
+          setChildren(loadedChildren);
+          if (loadedChildren.length > 0) {
+            setSelectedChildId(loadedChildren[0].id);
+          }
+        }
+      } else {
+        // No shared ID, load from local storage
+        const loadedChildren = loadChildren();
+        setChildren(loadedChildren);
+        if (loadedChildren.length > 0) {
+          setSelectedChildId(loadedChildren[0].id);
+        }
+      }
+
+      setStandard(loadLocation() as PercentileStandard);
+    };
+
+    loadInitialData();
   }, []);
 
   // Save data when children change
@@ -113,6 +145,7 @@ function App() {
             onAddMeasurement={handleAddMeasurement}
             onDeleteMeasurement={handleDeleteMeasurement}
             onDeleteChild={handleDeleteChild}
+            onUpdateChildren={setChildren}
           />
         );
       case 'about':
@@ -137,6 +170,7 @@ function App() {
             onAddMeasurement={handleAddMeasurement}
             onDeleteMeasurement={handleDeleteMeasurement}
             onDeleteChild={handleDeleteChild}
+            onUpdateChildren={setChildren}
           />
         );
     }

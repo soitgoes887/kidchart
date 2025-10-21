@@ -34,6 +34,14 @@ git push origin main
 6. Click "Environment variables (advanced)" and add:
    - **Name**: `NODE_VERSION`
    - **Value**: `20`
+   - **Name**: `VITE_SAVE_URL`
+   - **Value**: `https://your-save-lambda-url.lambda-url.region.on.aws/`
+   - **Name**: `VITE_LOAD_URL`
+   - **Value**: `https://your-load-lambda-url.lambda-url.region.on.aws/`
+   - **Name**: `VITE_SHARE_URL_BASE`
+   - **Value**: `https://kidchart.com`
+
+   > **Note**: Get your Lambda URLs by running `cd infrastructure && pulumi stack output`
 
 7. Click "Save and Deploy"
 
@@ -89,14 +97,40 @@ npm install --legacy-peer-deps && npm run build
 
 ## Local Testing
 
-Before deploying, test locally:
-```bash
-npm install
-npm run build
-npm run preview
-```
+Before deploying, set up your environment variables:
 
-Visit http://localhost:4173 to preview the production build.
+1. **Copy the example environment file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Update `.env` with your Lambda URLs:**
+   ```bash
+   # Get your Lambda URLs from Pulumi
+   cd infrastructure
+   pulumi stack output
+   ```
+
+   Then update `.env`:
+   ```
+   VITE_SAVE_URL=https://your-save-url.lambda-url.region.on.aws/
+   VITE_LOAD_URL=https://your-load-url.lambda-url.region.on.aws/
+   VITE_SHARE_URL_BASE=https://kidchart.com
+   ```
+
+3. **Test locally:**
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Visit http://localhost:5173 or http://127.0.0.1:5173
+
+4. **Test production build:**
+   ```bash
+   npm run build
+   npm run preview
+   ```
+   Visit http://localhost:4173 to preview the production build.
 
 ## Deployment Status
 
