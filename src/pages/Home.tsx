@@ -135,31 +135,27 @@ const Home: React.FC<HomeProps> = ({
           {/* Child Selector and Management */}
           {children.length > 0 && (
             <div className="card">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-2">Select Child</label>
-                  <select
-                    value={selectedChildId || ''}
-                    onChange={(e) => onSetSelectedChildId(e.target.value)}
-                    className="input-field"
+              <label className="block text-sm font-medium mb-2">Select Child</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <select
+                  value={selectedChildId || ''}
+                  onChange={(e) => onSetSelectedChildId(e.target.value)}
+                  className="input-field flex-1"
+                >
+                  {children.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.name} ({child.gender})
+                    </option>
+                  ))}
+                </select>
+                {selectedChild && (
+                  <button
+                    onClick={() => onDeleteChild(selectedChild.id)}
+                    className="btn-secondary text-red-600 whitespace-nowrap"
                   >
-                    {children.map((child) => (
-                      <option key={child.id} value={child.id}>
-                        {child.name} ({child.gender})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex gap-2">
-                  {selectedChild && (
-                    <button
-                      onClick={() => onDeleteChild(selectedChild.id)}
-                      className="btn-secondary text-red-600"
-                    >
-                      Delete Child
-                    </button>
-                  )}
-                </div>
+                    Delete Child
+                  </button>
+                )}
               </div>
             </div>
           )}
