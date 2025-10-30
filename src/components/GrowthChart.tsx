@@ -51,11 +51,19 @@ export const GrowthChart = ({
   const ageDivisor = useMonths ? 30.44 : 365; // months or years
   const ageUnit = useMonths ? 'months' : 'years';
 
+  // Check if this is NHS data (has p0_4, p2, p9 fields)
+  const isNHS = percentileData.length > 0 && (
+    percentileData[0].p0_4 !== undefined ||
+    percentileData[0].p2 !== undefined ||
+    percentileData[0].p9 !== undefined
+  );
+
   // Combine percentile data with actual measurements
   const chartData: Array<{
     age: number;
     ageInDays?: number;
     date?: string;
+    // WHO centiles
     p3?: number;
     p10?: number;
     p25?: number;
@@ -63,10 +71,18 @@ export const GrowthChart = ({
     p75?: number;
     p90?: number;
     p97?: number;
+    // NHS centiles
+    p0_4?: number;
+    p2?: number;
+    p9?: number;
+    p91?: number;
+    p98?: number;
+    p99_6?: number;
     actual?: number;
   }> = percentileData.map((p) => {
     return {
       age: p.age / ageDivisor,
+      // WHO centiles
       p3: p.p3,
       p10: p.p10,
       p25: p.p25,
@@ -74,6 +90,13 @@ export const GrowthChart = ({
       p75: p.p75,
       p90: p.p90,
       p97: p.p97,
+      // NHS centiles
+      p0_4: p.p0_4,
+      p2: p.p2,
+      p9: p.p9,
+      p91: p.p91,
+      p98: p.p98,
+      p99_6: p.p99_6,
     };
   });
 
@@ -91,6 +114,7 @@ export const GrowthChart = ({
         age: m.ageInDays / ageDivisor,
         ageInDays: m.ageInDays,
         date: m.date,
+        // WHO centiles
         p3: undefined,
         p10: undefined,
         p25: undefined,
@@ -98,6 +122,13 @@ export const GrowthChart = ({
         p75: undefined,
         p90: undefined,
         p97: undefined,
+        // NHS centiles
+        p0_4: undefined,
+        p2: undefined,
+        p9: undefined,
+        p91: undefined,
+        p98: undefined,
+        p99_6: undefined,
         actual: value,
       });
     }
@@ -256,83 +287,192 @@ export const GrowthChart = ({
           />
           <Tooltip content={<CustomTooltipWithAge />} />
           <Legend wrapperStyle={{ paddingTop: '20px' }} />
-          <Line
-            type="monotone"
-            dataKey="p3"
-            stroke="#fee2e2"
-            strokeWidth={1}
-            dot={false}
-            name="3rd"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
-          <Line
-            type="monotone"
-            dataKey="p10"
-            stroke="#fecaca"
-            strokeWidth={1}
-            dot={false}
-            name="10th"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
-          <Line
-            type="monotone"
-            dataKey="p25"
-            stroke="#fed7aa"
-            strokeWidth={1}
-            dot={false}
-            name="25th"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
-          <Line
-            type="monotone"
-            dataKey="p50"
-            stroke="#4ade80"
-            strokeWidth={2}
-            dot={false}
-            name="50th (Median)"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
-          <Line
-            type="monotone"
-            dataKey="p75"
-            stroke="#fed7aa"
-            strokeWidth={1}
-            dot={false}
-            name="75th"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
-          <Line
-            type="monotone"
-            dataKey="p90"
-            stroke="#fecaca"
-            strokeWidth={1}
-            dot={false}
-            name="90th"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
-          <Line
-            type="monotone"
-            dataKey="p97"
-            stroke="#fee2e2"
-            strokeWidth={1}
-            dot={false}
-            name="97th"
-            connectNulls
-            isAnimationActive={true}
-            animationDuration={800}
-          />
+
+          {/* Render NHS centile lines if NHS data, otherwise WHO centile lines */}
+          {isNHS ? (
+            <>
+              <Line
+                type="monotone"
+                dataKey="p0_4"
+                stroke="#fee2e2"
+                strokeWidth={1}
+                dot={false}
+                name="0.4th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p2"
+                stroke="#fecaca"
+                strokeWidth={1}
+                dot={false}
+                name="2nd"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p9"
+                stroke="#fed7aa"
+                strokeWidth={1}
+                dot={false}
+                name="9th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p25"
+                stroke="#fdba74"
+                strokeWidth={1}
+                dot={false}
+                name="25th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p50"
+                stroke="#4ade80"
+                strokeWidth={2}
+                dot={false}
+                name="50th (Median)"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p75"
+                stroke="#fdba74"
+                strokeWidth={1}
+                dot={false}
+                name="75th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p91"
+                stroke="#fed7aa"
+                strokeWidth={1}
+                dot={false}
+                name="91st"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p98"
+                stroke="#fecaca"
+                strokeWidth={1}
+                dot={false}
+                name="98th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p99_6"
+                stroke="#fee2e2"
+                strokeWidth={1}
+                dot={false}
+                name="99.6th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+            </>
+          ) : (
+            <>
+              <Line
+                type="monotone"
+                dataKey="p3"
+                stroke="#fee2e2"
+                strokeWidth={1}
+                dot={false}
+                name="3rd"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p10"
+                stroke="#fecaca"
+                strokeWidth={1}
+                dot={false}
+                name="10th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p25"
+                stroke="#fed7aa"
+                strokeWidth={1}
+                dot={false}
+                name="25th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p50"
+                stroke="#4ade80"
+                strokeWidth={2}
+                dot={false}
+                name="50th (Median)"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p75"
+                stroke="#fed7aa"
+                strokeWidth={1}
+                dot={false}
+                name="75th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p90"
+                stroke="#fecaca"
+                strokeWidth={1}
+                dot={false}
+                name="90th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+              <Line
+                type="monotone"
+                dataKey="p97"
+                stroke="#fee2e2"
+                strokeWidth={1}
+                dot={false}
+                name="97th"
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={800}
+              />
+            </>
+          )}
+
           <Line
             type="monotone"
             dataKey="actual"

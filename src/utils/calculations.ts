@@ -2,6 +2,9 @@ import { PercentileData, Gender, MeasurementType, PercentileStandard } from '../
 import { whoHeightBoys, whoHeightGirls } from '../data/whoHeightData';
 import { whoWeightBoys, whoWeightGirls } from '../data/whoWeightData';
 import { whoHeadCircumferenceBoys, whoHeadCircumferenceGirls } from '../data/whoHeadCircumferenceData';
+import { nhsHeightBoys, nhsHeightGirls } from '../data/nhsHeightData';
+import { nhsWeightBoys, nhsWeightGirls } from '../data/nhsWeightData';
+import { nhsHeadCircumferenceBoys, nhsHeadCircumferenceGirls } from '../data/nhsHeadCircumferenceData';
 
 export const calculateAgeInDays = (dateOfBirth: string, measurementDate: string): number => {
   const dob = new Date(dateOfBirth);
@@ -30,49 +33,33 @@ export const formatAge = (days: number): string => {
   }
 };
 
-// Helper function to adjust percentile data for different standards (placeholder)
-// This creates variations of WHO data to demonstrate different standards
-const adjustPercentileData = (
-  data: PercentileData[],
-  standard: PercentileStandard
-): PercentileData[] => {
-  // Each standard has slightly different percentile curves
-  // These are PLACEHOLDER adjustments - replace with actual standard data
-  const adjustments: Record<PercentileStandard, number> = {
-    WHO: 1.0,        // Base (no adjustment)
-    NHS: 1.0,        // NHS uses WHO for 0-4 years
-    CDC: 1.02,       // CDC tends to be slightly higher
-    Germany: 1.01,   // German children slightly taller on average
-    Australia: 1.0,  // Australia uses WHO
-    China: 0.97,     // Chinese standards tend to be slightly lower
-    Japan: 0.96,     // Japanese standards tend to be lower
-    France: 1.01,    // French standards slightly higher
-  };
-
-  const factor = adjustments[standard];
-
-  return data.map((point) => ({
-    ...point,
-    p3: point.p3 ? point.p3 * factor : undefined,
-    p10: point.p10 ? point.p10 * factor : undefined,
-    p25: point.p25 ? point.p25 * factor : undefined,
-    p50: point.p50 ? point.p50 * factor : undefined,
-    p75: point.p75 ? point.p75 * factor : undefined,
-    p90: point.p90 ? point.p90 * factor : undefined,
-    p97: point.p97 ? point.p97 * factor : undefined,
-  }));
-};
-
 export const getPercentileData = (
   measurementType: MeasurementType,
   gender: Gender,
   standard: PercentileStandard = 'WHO'
 ): PercentileData[] => {
-  // TODO: Replace with actual data for each standard from official sources
-  // Current implementation uses WHO data with adjustments as placeholder
-
   let baseData: PercentileData[];
 
+  // Use official WHO or NHS data based on standard selected
+  if (standard === 'NHS') {
+    // Use NHS/UK-WHO specific data with 0.4th, 2nd, 9th, 25th, 50th, 75th, 91st, 98th, 99.6th centiles
+    switch (measurementType) {
+      case 'height':
+        baseData = gender === 'male' ? nhsHeightBoys : nhsHeightGirls;
+        break;
+      case 'weight':
+        baseData = gender === 'male' ? nhsWeightBoys : nhsWeightGirls;
+        break;
+      case 'headCircumference':
+        baseData = gender === 'male' ? nhsHeadCircumferenceBoys : nhsHeadCircumferenceGirls;
+        break;
+      default:
+        return [];
+    }
+    return baseData;
+  }
+
+  // Use official WHO data (default)
   switch (measurementType) {
     case 'height':
       baseData = gender === 'male' ? whoHeightBoys : whoHeightGirls;
@@ -87,7 +74,7 @@ export const getPercentileData = (
       return [];
   }
 
-  return adjustPercentileData(baseData, standard);
+  return baseData;
 };
 
 // Linear interpolation to get percentile values for any age
@@ -116,6 +103,7 @@ export const interpolatePercentile = (
 
       return {
         age,
+        // WHO centiles
         p3: p1.p3 && p2.p3 ? p1.p3 + ratio * (p2.p3 - p1.p3) : undefined,
         p10: p1.p10 && p2.p10 ? p1.p10 + ratio * (p2.p10 - p1.p10) : undefined,
         p25: p1.p25 && p2.p25 ? p1.p25 + ratio * (p2.p25 - p1.p25) : undefined,
@@ -123,6 +111,13 @@ export const interpolatePercentile = (
         p75: p1.p75 && p2.p75 ? p1.p75 + ratio * (p2.p75 - p1.p75) : undefined,
         p90: p1.p90 && p2.p90 ? p1.p90 + ratio * (p2.p90 - p1.p90) : undefined,
         p97: p1.p97 && p2.p97 ? p1.p97 + ratio * (p2.p97 - p1.p97) : undefined,
+        // NHS centiles
+        p0_4: p1.p0_4 && p2.p0_4 ? p1.p0_4 + ratio * (p2.p0_4 - p1.p0_4) : undefined,
+        p2: p1.p2 && p2.p2 ? p1.p2 + ratio * (p2.p2 - p1.p2) : undefined,
+        p9: p1.p9 && p2.p9 ? p1.p9 + ratio * (p2.p9 - p1.p9) : undefined,
+        p91: p1.p91 && p2.p91 ? p1.p91 + ratio * (p2.p91 - p1.p91) : undefined,
+        p98: p1.p98 && p2.p98 ? p1.p98 + ratio * (p2.p98 - p1.p98) : undefined,
+        p99_6: p1.p99_6 && p2.p99_6 ? p1.p99_6 + ratio * (p2.p99_6 - p1.p99_6) : undefined,
       };
     }
   }
@@ -138,12 +133,30 @@ export const determinePercentileRange = (
   const interpolated = interpolatePercentile(ageInDays, percentileData);
   if (!interpolated) return 'N/A';
 
-  if (interpolated.p3 && value < interpolated.p3) return '<3rd';
-  if (interpolated.p10 && value < interpolated.p10) return '3rd-10th';
-  if (interpolated.p25 && value < interpolated.p25) return '10th-25th';
-  if (interpolated.p50 && value < interpolated.p50) return '25th-50th';
-  if (interpolated.p75 && value < interpolated.p75) return '50th-75th';
-  if (interpolated.p90 && value < interpolated.p90) return '75th-90th';
-  if (interpolated.p97 && value < interpolated.p97) return '90th-97th';
-  return '>97th';
+  // Check if this is NHS data (has p0_4, p2, p9 fields) or WHO data (has p3, p10 fields)
+  const isNHS = interpolated.p0_4 !== undefined || interpolated.p2 !== undefined || interpolated.p9 !== undefined;
+
+  if (isNHS) {
+    // NHS centiles: 0.4th, 2nd, 9th, 25th, 50th, 75th, 91st, 98th, 99.6th
+    if (interpolated.p0_4 && value < interpolated.p0_4) return '<0.4th';
+    if (interpolated.p2 && value < interpolated.p2) return '0.4th-2nd';
+    if (interpolated.p9 && value < interpolated.p9) return '2nd-9th';
+    if (interpolated.p25 && value < interpolated.p25) return '9th-25th';
+    if (interpolated.p50 && value < interpolated.p50) return '25th-50th';
+    if (interpolated.p75 && value < interpolated.p75) return '50th-75th';
+    if (interpolated.p91 && value < interpolated.p91) return '75th-91st';
+    if (interpolated.p98 && value < interpolated.p98) return '91st-98th';
+    if (interpolated.p99_6 && value < interpolated.p99_6) return '98th-99.6th';
+    return '>99.6th';
+  } else {
+    // WHO centiles: 3rd, 10th, 25th, 50th, 75th, 90th, 97th
+    if (interpolated.p3 && value < interpolated.p3) return '<3rd';
+    if (interpolated.p10 && value < interpolated.p10) return '3rd-10th';
+    if (interpolated.p25 && value < interpolated.p25) return '10th-25th';
+    if (interpolated.p50 && value < interpolated.p50) return '25th-50th';
+    if (interpolated.p75 && value < interpolated.p75) return '50th-75th';
+    if (interpolated.p90 && value < interpolated.p90) return '75th-90th';
+    if (interpolated.p97 && value < interpolated.p97) return '90th-97th';
+    return '>97th';
+  }
 };

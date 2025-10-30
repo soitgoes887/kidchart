@@ -9,8 +9,8 @@ const About: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 mb-8">
           <h2 className="text-2xl font-semibold text-orange-600 dark:text-orange-400 mb-4">Our Mission</h2>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-            KidChart was created to help parents track and understand their children's growth patterns using
-            internationally recognized WHO and NHS growth standards.
+            KidChart helps parents track and understand their children's growth patterns using
+            official WHO (World Health Organization) and NHS/UK-WHO growth standards.
           </p>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
             Every child grows at their own pace, and monitoring growth helps ensure healthy development.
@@ -32,8 +32,10 @@ const About: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">WHO & NHS Standards</h3>
               <p className="text-gray-700 dark:text-gray-300">
-                View your child's measurements against WHO (World Health Organization) or NHS (UK)
-                growth standards with percentile charts showing the 3rd, 10th, 25th, 50th, 75th, 90th, and 97th percentiles.
+                View your child's measurements against official WHO (World Health Organization) standards or
+                NHS/UK-WHO (England) standards. WHO charts show 7 percentile lines (3rd, 10th, 25th, 50th, 75th, 90th, 97th),
+                while NHS charts display 9 centile lines (0.4th, 2nd, 9th, 25th, 50th, 75th, 91st, 98th, 99.6th).
+                Both use the same underlying WHO data.
               </p>
             </div>
             <div>

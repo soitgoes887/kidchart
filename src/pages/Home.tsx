@@ -121,14 +121,8 @@ const Home: React.FC<HomeProps> = ({
               ))}
             </select>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              {standard === 'WHO' && 'WHO standards are used internationally'}
-              {standard === 'NHS' && 'NHS standards are specific to the UK'}
-              {standard === 'CDC' && 'CDC standards are used in the United States'}
-              {standard === 'Germany' && 'German standards from Robert Koch Institute'}
-              {standard === 'Australia' && 'Australian standards from APEG'}
-              {standard === 'China' && 'Chinese standards from Ministry of Health'}
-              {standard === 'Japan' && 'Japanese standards from Ministry of Health'}
-              {standard === 'France' && 'French standards from National Nutrition Program'}
+              {standard === 'WHO' && 'WHO standards are used internationally and show 7 percentile lines'}
+              {standard === 'NHS' && 'NHS/UK-WHO standards (England) show 9 centile lines based on WHO data'}
             </p>
           </div>
 
