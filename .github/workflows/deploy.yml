@@ -98,7 +98,7 @@ jobs:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
         run: |
           pulumi login s3://kidchart-pulumi-state
-          pulumi stack select dev
+          pulumi stack select --create dev
           pulumi config set aws:region eu-west-2
           pulumi config set image ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.tag }}
           pulumi up --yes
