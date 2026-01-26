@@ -1,6 +1,9 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 
+// Import Kubernetes resources
+import * as k8s from "./kubernetes";
+
 // Common tags for all resources
 const commonTags = {
     site: "kidchart",
@@ -112,10 +115,11 @@ new aws.iam.RolePolicy("kidchart-lambda-s3-policy", {
 // Save children data Lambda
 const saveChildrenLambda = new aws.lambda.Function("kidchart-save-children", {
     name: "kidchart-save-children",
-    runtime: "nodejs20.x",
+    runtime: "nodejs22.x",
     role: lambdaRole.arn,
     handler: "index.handler",
     tags: commonTags,
+    architectures: ["arm64"],
     code: new pulumi.asset.AssetArchive({
         "index.js": new pulumi.asset.FileAsset("./lambda/save.js"),
     }),
@@ -132,10 +136,11 @@ const saveChildrenLambda = new aws.lambda.Function("kidchart-save-children", {
 // Load children data Lambda
 const loadChildrenLambda = new aws.lambda.Function("kidchart-load-children", {
     name: "kidchart-load-children",
-    runtime: "nodejs20.x",
+    runtime: "nodejs22.x",
     role: lambdaRole.arn,
     handler: "index.handler",
     tags: commonTags,
+    architectures: ["arm64"],
     code: new pulumi.asset.AssetArchive({
         "index.js": new pulumi.asset.FileAsset("./lambda/load.js"),
     }),
@@ -177,3 +182,10 @@ export const bucketName = childrenBucket.bucket;
 export const saveUrl = saveFunctionUrl.functionUrl;
 export const loadUrl = loadFunctionUrl.functionUrl;
 export const billingAlertTopicArn = billingAlertTopic.arn;
+
+// Kubernetes outputs
+export const k8sNamespace = k8s.k8sNamespace;
+export const k8sDeployment = k8s.k8sDeployment;
+export const k8sImage = k8s.k8sImage;
+export const k8sReplicas = k8s.k8sReplicas;
+export const k8sUrl = k8s.k8sUrl;
