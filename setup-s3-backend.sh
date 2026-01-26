@@ -61,6 +61,7 @@ aws s3api put-bucket-lifecycle-configuration \
         "Rules": [{
             "ID": "DeleteOldVersions",
             "Status": "Enabled",
+            "Filter": {"Prefix": ""},
             "NoncurrentVersionExpiration": {
                 "NoncurrentDays": 90
             },
